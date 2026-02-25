@@ -1,21 +1,23 @@
-# Automated-Hardware-Career-Scraper
-Author: Salem Khatib
+# 🚀 Silicon Career Monitor: Nvidia & Intel (Israel)
 
-Tech Stack: Python, Workday API, SMTP, JSON
+### 📌 Project Overview
+In the competitive Israeli semiconductor industry, being one of the first applicants is a major strategic advantage. I built this tool to automate the manual process of job hunting. The script monitors the **Workday APIs** of Nvidia and Intel, specifically filtering for student and intern roles at their Israeli development centers (Haifa, Yokneam, Petah Tikva, Jerusalem, and Tel Aviv).
 
-📌 Overview:
-In the highly competitive Israeli semiconductor market, timing is everything. I built this automated scraper to monitor the career portals of Nvidia and Intel in real-time. The script ensures I am among the first applicants for new student and intern roles by sending instant email notifications the moment a position is posted.
+### 🛠️ Technical Features
+* **API-Driven Monitoring:** Directly interfaces with Nvidia (WD5) and Intel (WD1) career portal endpoints to fetch real-time data.
+* **Intelligent Filtering:** High-precision keyword matching for "Student" and "Intern" roles.
+* **Daily Freshness Logic:** Implements a "Posted Today" filter to ensure notifications only trigger for brand-new opportunities.
+* **Automated Email Alerts:** Configured with `smtplib` and Google App Passwords for secure, automated notifications to a dedicated job-hunting inbox.
+* **Data Persistence:** Uses a local JSON-based tracking system to ensure no duplicate notifications are sent for the same Role ID.
+* **Security-First Design:** Built using `os.getenv` for environment variable management, ensuring that personal email credentials remain private and are never hardcoded.
 
-⚙️ Key Features:
-Multi-Source Monitoring: Simultaneously tracks Nvidia (Workday WD5) and Intel (Workday WD1) API endpoints.
+### 💡 Why I Built This
+As an **Electrical Engineering student at Tel Aviv University** focusing on **VLSI design and Computer Architecture**, I wanted to ensure I never miss a "Junior DFT" or "Hardware Verification" role. This project bridges my interest in Python automation with my career goals in the hardware-software interface.
 
-Intelligent Filtering: Specifically targets "Student" and "Intern" roles within the Israel region.
-
-Freshness Check: Uses logic to only alert on roles posted "Today," avoiding old listing fatigue.
-
-Email Integration: Uses Python's smtplib to send real-time alerts to a dedicated job-hunting inbox.
-
-Persistence: Maintains a seen_jobs.json database to ensure no duplicate notifications.
-
-🛠️ Why I Built This:
-Applying for VLSI and Hardware roles at Tier-1 companies requires speed. By the time a role is "featured" on LinkedIn, it often has hundreds of applicants. This tool gives me a strategic "First-In" advantage.
+### 🚀 Getting Started
+1. **Set Environment Variables:**
+   - `SCRAPER_EMAIL`: Your dedicated alert email.
+   - `SCRAPER_PASS`: Your 16-character Google App Password.
+2. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
