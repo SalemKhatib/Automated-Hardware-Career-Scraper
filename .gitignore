@@ -203,5 +203,7 @@ cython_debug/
 
 # Marimo
 marimo/_static/
+
 marimo/_lsp/
+seen_jobs.json
 __marimo__/
