@@ -1,23 +1,90 @@
-# 🚀 Silicon Career Monitor: Nvidia & Intel (Israel)
+# 🚨 Israel Student Job Scraper
 
-### 📌 Project Overview
-In the competitive Israeli semiconductor industry, being one of the first applicants is a major strategic advantage. I built this tool to automate the manual process of job hunting. The script monitors the **Workday APIs** of Nvidia and Intel, specifically filtering for student and intern roles at their Israeli development centers (Haifa, Yokneam, Petah Tikva, Jerusalem, and Tel Aviv).
+Monitors Nvidia and Intel's Workday job boards for new student / intern roles posted in Israel, and sends an email alert the moment one appears.
 
-### 🛠️ Technical Features
-* **API-Driven Monitoring:** Directly interfaces with Nvidia (WD5) and Intel (WD1) career portal endpoints to fetch real-time data.
-* **Intelligent Filtering:** High-precision keyword matching for "Student" and "Intern" roles.
-* **Daily Freshness Logic:** Implements a "Posted Today" filter to ensure notifications only trigger for brand-new opportunities.
-* **Automated Email Alerts:** Configured with `smtplib` and Google App Passwords for secure, automated notifications to a dedicated job-hunting inbox.
-* **Data Persistence:** Uses a local JSON-based tracking system to ensure no duplicate notifications are sent for the same Role ID.
-* **Security-First Design:** Built using `os.getenv` for environment variable management, ensuring that personal email credentials remain private and are never hardcoded.
+---
 
-### 💡 Why I Built This
-As an **Electrical Engineering student at Tel Aviv University** focusing on **VLSI design and Computer Architecture**, I wanted to ensure I never miss a "Junior DFT" or "Hardware Verification" role. This project bridges my interest in Python automation with my career goals in the hardware-software interface.
+## Features
 
-### 🚀 Getting Started
-1. **Set Environment Variables:**
-   - `SCRAPER_EMAIL`: Your dedicated alert email.
-   - `SCRAPER_PASS`: Your 16-character Google App Password.
-2. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
+- Scrapes Nvidia and Intel Workday APIs every 30 minutes
+- Filters for student / intern roles in Israeli locations
+- Sends a Gmail alert with the job title, location, and direct apply link
+- Remembers seen jobs (with 90-day pruning) so you never get duplicate emails
+- Retries automatically on network errors
+
+---
+
+## Setup
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/your-username/job-scraper.git
+cd job-scraper
+```
+
+### 2. Install dependencies
+```bash
+pip install requests python-dotenv
+```
+
+### 3. Configure your credentials
+```bash
+cp .env.example .env
+```
+Then open `.env` and fill in your Gmail address and [App Password](https://support.google.com/accounts/answer/185833).
+
+```
+SENDER_EMAIL=your.email@gmail.com
+RECEIVER_EMAIL=your.email@gmail.com
+EMAIL_APP_PASSWORD=your16letterapppassword
+```
+
+> ⚠️ `.env` is listed in `.gitignore` and will never be committed to GitHub.
+
+### 4. Run
+```bash
+python job_scraper.py
+```
+
+The script will send a test email on startup to confirm the connection, then begin scanning every 30 minutes. Keep the terminal open (or run it in the background with `nohup` or a scheduler).
+
+---
+
+## Running in the background (optional)
+
+```bash
+# Linux / Mac — keep running after you close the terminal
+nohup python job_scraper.py &
+
+# Check output
+tail -f nohup.out
+```
+
+---
+
+## Adding more companies
+
+Add a new entry to the `COMPANIES` dict in `job_scraper.py`:
+
+```python
+COMPANIES = {
+    "Nvidia": "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs",
+    "Intel":  "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs",
+    "NewCo":  "https://newco.wd1.myworkdayjobs.com/wday/cxs/newco/Careers/jobs",  # ← add here
+}
+```
+
+---
+
+## File structure
+
+```
+job-scraper/
+├── job_scraper.py    # Main script
+├── .env.example      # Credentials template (safe to commit)
+├── .env              # Your real credentials (gitignored)
+├── .gitignore
+└── README.md
+```
+
+`seen_jobs.json` is created automatically at runtime and is also gitignored.
