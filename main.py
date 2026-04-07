@@ -5,19 +5,16 @@ import smtplib
 import re
 import datetime
 import threading
-import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pathlib import Path
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from dotenv import load_dotenv
 
 # --- EMAIL SETTINGS ---
-load_dotenv()
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL")
-RECEIVER_EMAIL = os.environ.get("RECEIVER_EMAIL")
-EMAIL_PASSWORD = os.environ.get("EMAIL_APP_PASSWORD")
+SENDER_EMAIL = "your_email"
+RECEIVER_EMAIL = "your_email"
+EMAIL_PASSWORD = "google_app_password"  # 16-letter App Password
 
 # --- SCRAPER SETTINGS ---
 SEEN_FILE = Path("seen_jobs.json")
@@ -99,7 +96,14 @@ def send_email_alert(company, title, location, url, is_test=False):
 def scan_company(company_name, api_url, seen):
     """Scan a single company's Workday API for new student jobs in Israel."""
     try:
-        search_terms = ["Israel"]
+        if company_name == "Nvidia":
+            search_terms = ["student", "intern"]
+        elif company_name == "Intel":
+            search_terms = ["Haifa", "Jerusalem","Kiryat-Gat","Petah-Tikva"]
+
+
+
+
 
         for term in search_terms:
             print(f"  [{company_name}] Searching '{term}'...", flush=True)
@@ -185,7 +189,7 @@ while True:
     for t in threads:
         t.start()
     for t in threads:
-        t.join()
+        t.join()  # Wait for all companies to finish before sleeping
 
     print(f"[{time.strftime('%X')}] Scan complete. Next check in {timer // 60} mins.\n", flush=True)
     time.sleep(timer)
