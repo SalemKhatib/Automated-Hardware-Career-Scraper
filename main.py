@@ -12,9 +12,9 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 # --- EMAIL SETTINGS ---
-SENDER_EMAIL = "your_email"
-RECEIVER_EMAIL = "your_email"
-EMAIL_PASSWORD = "google_app_password"  # 16-letter App Password
+SENDER_EMAIL = "YOUR_EMAIL"
+RECEIVER_EMAIL = "YOUR_EMAIL"
+EMAIL_PASSWORD = "GOOGLE_PASSWORD"  # 16-letter App Password
 
 # --- SCRAPER SETTINGS ---
 SEEN_FILE = Path("seen_jobs.json")
@@ -97,7 +97,7 @@ def scan_company(company_name, api_url, seen):
     """Scan a single company's Workday API for new student jobs in Israel."""
     try:
         if company_name == "Nvidia":
-            search_terms = ["student", "intern"]
+            search_terms = ["Yokneam", "Raanana", "Beer Sheva", "Tel Aviv"]
         elif company_name == "Intel":
             search_terms = ["Haifa", "Jerusalem","Kiryat-Gat","Petah-Tikva"]
 
@@ -140,14 +140,7 @@ def scan_company(company_name, api_url, seen):
                     is_posted_today = "today" in posted_on
 
                     if is_student and is_in_israel:
-                        if not is_posted_today:
-                            if job_id not in seen:
-                                print(f"  [SKIP] '{job.get('title')}' — not posted today ('{job.get('postedOn')}')", flush=True)
-                                seen[job_id] = datetime.date.today().isoformat()
-                                save_seen(seen)
-                        elif job_id in seen:
-                            pass  # Already alerted
-                        else:
+                        if job_id not in seen:
                             seen[job_id] = datetime.date.today().isoformat()
                             save_seen(seen)
 
@@ -158,7 +151,9 @@ def scan_company(company_name, api_url, seen):
                             )
                             job_url = f"https://{domain}{job_id}"
 
-                            print(f"\n🚨 NEW {company_name.upper()} JOB: {job.get('title')} — {job.get('locationsText')}", flush=True)
+                            print(
+                                f"\n🚨 NEW {company_name.upper()} JOB: {job.get('title')} — {job.get('locationsText')}",
+                                flush=True)
                             send_email_alert(company_name, job.get('title'), job.get('locationsText'), job_url)
 
                 offset += 20
