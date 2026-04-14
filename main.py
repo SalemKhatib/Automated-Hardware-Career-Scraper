@@ -99,11 +99,7 @@ def scan_company(company_name, api_url, seen):
         if company_name == "Nvidia":
             search_terms = ["Yokneam", "Raanana", "Beer Sheva", "Tel Aviv"]
         elif company_name == "Intel":
-            search_terms = ["Haifa", "Jerusalem","Kiryat-Gat","Petah-Tikva"]
-
-
-
-
+            search_terms = ["Haifa", "Jerusalem", "Kiryat-Gat", "Petah-Tikva"]
 
         for term in search_terms:
             print(f"  [{company_name}] Searching '{term}'...", flush=True)
@@ -129,50 +125,25 @@ def scan_company(company_name, api_url, seen):
                 for job in jobs:
                     title = job.get("title", "").lower()
                     job_id = job.get("externalPath", "")
-                    location = job.get("locationsText", "").lower()
+                    location = job.get("locationsText", "")
 
-                    # CHEAPEST CHECK: Is it a student job?
+                    # City-name search guarantees Israel is one of the locations
                     is_student = bool(re.search(r'\b(student|students|intern|interns)\b', title))
 
-                    # Only do the expensive network checks IF it's a student job!
                     if is_student:
+                        if job_id not in seen:
+                            seen[job_id] = datetime.date.today().isoformat()
+                            save_seen(seen)
 
-                        # EXPENSIVE CHECK: The Secondary API Call
-                        if "locations" in location and any(char.isdigit() for char in location):
-                            try:
-                                base = "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite" if company_name == "Nvidia" else "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External"
-                                detail_resp = session.get(f"{base}{job_id}", headers=headers, timeout=10)
-                                full_detail = str(detail_resp.json()).lower()
-                                is_in_israel = any(loc in full_detail for loc in [
-                                    "israel", "haifa", "petah tikva", "petah-tikva", "jerusalem", "yokneam",
-                                    "tel aviv", "beer sheva", "ra'anana", "raanana", "kiryat gat", "kiryat-gat"
-                                ])
-                            except Exception:
-                                is_in_israel = False
-                        else:
-                            # CHEAP CHECK: Normal location string search
-                            is_in_israel = any(loc in location for loc in [
-                                "israel", "haifa", "petah tikva", "petah-tikva", "jerusalem", "yokneam",
-                                "tel aviv", "beer sheva", "ra'anana", "raanana", "kiryat gat", "kiryat-gat"
-                            ])
+                            domain = (
+                                "nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite"
+                                if company_name == "Nvidia"
+                                else "intel.wd1.myworkdayjobs.com/en-US/External"
+                            )
+                            job_url = f"https://{domain}{job_id}"
 
-                        # If it passed the student check AND the Israel check, send the email!
-                        if is_in_israel:
-                            if job_id not in seen:
-                                seen[job_id] = datetime.date.today().isoformat()
-                                save_seen(seen)
-
-                                domain = (
-                                    "nvidia.wd5.myworkdayjobs.com/en-US/NVIDIAExternalCareerSite"
-                                    if company_name == "Nvidia"
-                                    else "intel.wd1.myworkdayjobs.com/en-US/External"
-                                )
-                                job_url = f"https://{domain}{job_id}"
-
-                                print(
-                                    f"\n🚨 NEW {company_name.upper()} JOB: {job.get('title')} — {job.get('locationsText')}",
-                                    flush=True)
-                                send_email_alert(company_name, job.get('title'), job.get('locationsText'), job_url)
+                            print(f"\n🚨 NEW {company_name.upper()} JOB: {job.get('title')} — {location}", flush=True)
+                            send_email_alert(company_name, job.get('title'), location, job_url)
 
                 offset += 20
                 page += 1
@@ -202,7 +173,7 @@ while True:
     for t in threads:
         t.start()
     for t in threads:
-        t.join()  # Wait for all companies to finish before sleeping
+        t.join()
 
     print(f"[{time.strftime('%X')}] Scan complete. Next check in {timer // 60} mins.\n", flush=True)
     time.sleep(timer)
